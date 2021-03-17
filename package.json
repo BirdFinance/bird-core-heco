@@ -1,0 +1,51 @@
+{
+  "name": "bird-core-heco",
+  "version": "0.1.0",
+  "description": "Bird Core Heco",
+  "repository": "https://github.com/BirdFinance/bird-core-heco",
+  "license": "MIT",
+  "scripts": {
+    "build:ts": "yarn run tsc",
+    "build:sc": "npx hardhat compile --force",
+
+    "infoVaultStrategy": "HARDHAT_NETWORK=huobi ts-node ./scripts/infoVaultStrategy.ts",
+    "infoVault": "HARDHAT_NETWORK=huobi ts-node ./scripts/infoVault.ts",
+    "compound": "HARDHAT_NETWORK=huobi ts-node ./scripts/compound.ts",
+
+    "updateMdxPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateMdxPools.ts",
+    "updateMdxPoolsRoute": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateMdxPoolsRoute.ts",
+    "updateMdxPoolsAllocPoint": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateMdxPoolsAllocPoint.ts",
+
+    "updateStrategy": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateStrategy.ts",
+
+    "deployBird": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployBird.ts",
+    "deployControllerAndComplex": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployControllerAndComplex.ts",
+    "deployVaults": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployVaults.ts",
+    "deployPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployPools.ts",
+    "deployMiningPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployMiningPools.ts",
+
+    "======================": "==========================diff mnemonic==============================",
+    "compare": "HARDHAT_NETWORK=hardhat ts-node scripts/compare.ts"
+
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.1",
+    "sqlite3": "^5.0.2",
+    "typeorm": "^0.2.31",
+    "csv-parse": "^4.15.3"
+  },
+  "devDependencies": {
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@types/chai": "^4.2.15",
+    "@types/mocha": "^8.2.2",
+    "@types/node": "^14.14.35",
+    "chai": "^4.3.4",
+    "ethereum-waffle": "^3.3.0",
+    "ethers": "^5.0.32",
+    "hardhat": "^2.1.2",
+    "mocha": "^8.3.2",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  }
+}
