@@ -23,7 +23,7 @@ contract BirdTokenTest is Context, IERC20, Ownable {
     address[] private _excluded;
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 1 * 10 ** 10 * 10 ** 18;
+    uint256 private _tTotal = 1 * 10 ** 9 * 10 ** 18;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
@@ -46,8 +46,8 @@ contract BirdTokenTest is Context, IERC20, Ownable {
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
 
-    uint256 public _maxTxAmount = 5 * 10 ** 7 * 10 ** 18;//5/1000
-    uint256 private numTokensSellToAddToLiquidity = 0.5 * 10 ** 7 * 10 ** 18;//5/10000
+    uint256 public _maxTxAmount = 5 * 10 ** 6 * 10 ** 18;//5/1000
+    uint256 private numTokensSellToAddToLiquidity = 0.5 * 10 ** 6 * 10 ** 18;//5/10000
 
     address internal feeMgr;
 
@@ -65,7 +65,7 @@ contract BirdTokenTest is Context, IERC20, Ownable {
         inSwapAndLiquify = false;
     }
 
-    constructor (address mdexRouter,address _feeManager) public {
+    constructor (address mdexRouter, address _feeManager) public {
         _rOwned[_msgSender()] = _rTotal;
 
         IMdexRouter _uniswapV2Router = IMdexRouter(mdexRouter);
@@ -480,5 +480,8 @@ contract BirdTokenTest is Context, IERC20, Ownable {
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
-
+    function changeSetting(uint256 _maxTxAmount_, uint256 _numTokensSellToAddToLiquidity_) external onlyOwner {
+        _maxTxAmount = _maxTxAmount_;
+        numTokensSellToAddToLiquidity = _numTokensSellToAddToLiquidity_;
+    }
 }

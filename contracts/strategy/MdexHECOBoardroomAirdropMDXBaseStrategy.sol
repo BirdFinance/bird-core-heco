@@ -11,16 +11,15 @@ import "../strategy/IStrategy.sol";
 import "../mdex/IMdexRouter.sol";
 import "../mdex/IMdexPair.sol";
 import "./BaseStrategy.sol";
-import "../rewardPool/IHecoPool.sol";
 import "../mdex/ISwapMining.sol";
+import "../rewardPool/IHecoMdexAirdropPoolMDX.sol";
 
-abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
+abstract contract MdexHECOBoardroomAirdropMDXBaseStrategy is BaseStrategy {
     using SafeERC20 for IERC20;
 
-    IHecoPool public pool;
+    IHecoMdexAirdropPoolMDX public pool;
     uint256 public poolID;
     ISwapMining public swapMining;
-
     IMdexPair internal mdxUsdtPair;
     address usdtForDex;
 
@@ -30,7 +29,7 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
         IERC20 _capital,
         address _swapRouter,
         IERC20 _rewardToken,
-        IHecoPool _pool,
+        IHecoMdexAirdropPoolMDX _pool,
         uint256 _poolID,
         ISwapMining _swapMining,
         uint256 _profitFee,
@@ -41,7 +40,7 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
         poolID = _poolID;
 
         address _lpt;
-        (_lpt,,,,,) = pool.poolInfo(poolID);
+        (_lpt,,,,) = pool.poolInfo(poolID);
         require(_lpt == address(capital_), "Pool Info does not match capital");
         swapMining = _swapMining;
         mdxUsdtPair = _mdxUsdtPair;
@@ -128,7 +127,7 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
 
     function getPoolRewardApy() override external view returns (uint256 apy100){
         //apy = totalProduction in usdt over one year / total stake in usdt
-        (,uint256 allocPoint,,,,uint256 totalAmount) = pool.poolInfo(poolID);
+        (,uint256 allocPoint,,,uint256 totalAmount) = pool.poolInfo(poolID);
         uint256 mdxPerBlock = pool.mdxPerBlock();
         uint256 totalAllocPoint = pool.totalAllocPoint();
         //underlying block time is 3 seconds

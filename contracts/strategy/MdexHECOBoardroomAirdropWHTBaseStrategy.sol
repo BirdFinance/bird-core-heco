@@ -11,17 +11,16 @@ import "../strategy/IStrategy.sol";
 import "../mdex/IMdexRouter.sol";
 import "../mdex/IMdexPair.sol";
 import "./BaseStrategy.sol";
-import "../rewardPool/IHecoPool.sol";
 import "../mdex/ISwapMining.sol";
+import "../rewardPool/IHecoMdexAirdropPool.sol";
 
-abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
+abstract contract MdexHECOBoardroomAirdropWHTBaseStrategy is BaseStrategy {
     using SafeERC20 for IERC20;
 
-    IHecoPool public pool;
+    IHecoMdexAirdropPool public pool;
     uint256 public poolID;
     ISwapMining public swapMining;
-
-    IMdexPair internal mdxUsdtPair;
+    IMdexPair internal whtUsdtPair;
     address usdtForDex;
 
     constructor(
@@ -30,21 +29,21 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
         IERC20 _capital,
         address _swapRouter,
         IERC20 _rewardToken,
-        IHecoPool _pool,
+        IHecoMdexAirdropPool _pool,
         uint256 _poolID,
         ISwapMining _swapMining,
         uint256 _profitFee,
-        IMdexPair _mdxUsdtPair,
+        IMdexPair _whtUsdtPair,
         address _usdtForDex
     )BaseStrategy(_vault, _controller, _capital, _swapRouter, _rewardToken, _profitFee) public {
         pool = _pool;
         poolID = _poolID;
 
         address _lpt;
-        (_lpt,,,,,) = pool.poolInfo(poolID);
+        (_lpt,,,) = pool.poolInfo(poolID);
         require(_lpt == address(capital_), "Pool Info does not match capital");
         swapMining = _swapMining;
-        mdxUsdtPair = _mdxUsdtPair;
+        whtUsdtPair = _whtUsdtPair;
         usdtForDex = _usdtForDex;
     }
 
@@ -128,27 +127,28 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
 
     function getPoolRewardApy() override external view returns (uint256 apy100){
         //apy = totalProduction in usdt over one year / total stake in usdt
-        (,uint256 allocPoint,,,,uint256 totalAmount) = pool.poolInfo(poolID);
-        uint256 mdxPerBlock = pool.mdxPerBlock();
+        (address lpToken,uint256 allocPoint,,) = pool.poolInfo(poolID);
+        uint256 totalAmount = IERC20(lpToken).balanceOf(address(pool));
+        uint256 whtPerBlock = pool.whtPerBlock();
         uint256 totalAllocPoint = pool.totalAllocPoint();
         //underlying block time is 3 seconds
-        //rewardToken is mdx
-        uint256 totalProductionPerYear = mdxPerBlock.mul(10512000).mul(allocPoint).div(totalAllocPoint);
+        //rewardToken is wht
+        uint256 totalProductionPerYear = whtPerBlock.mul(10512000).mul(allocPoint).div(totalAllocPoint);
 
-        //price = usdt / mdx
-        (uint256 usdt,uint256 mdx,) = IMdexPair(mdxUsdtPair).getReserves();
-        if (IMdexPair(mdxUsdtPair).token1() == usdtForDex) {
+        //price = usdt / wht
+        (uint256 usdt,uint256 wht,) = IMdexPair(whtUsdtPair).getReserves();
+        if (IMdexPair(whtUsdtPair).token1() == usdtForDex) {
             uint256 temp = usdt;
-            usdt = mdx;
-            mdx = temp;
+            usdt = wht;
+            wht = temp;
         }
 
 
         /*
-                totalProductionPerYear * usdt / mdx
+                totalProductionPerYear * usdt / wht
         apy =  -----------------------------------------------
                  totalAmount * capitalPrice / 10**18
         */
-        apy100 = totalProductionPerYear.mul(baseCent).mul(usdt).mul(baseDecimal).div(mdx).div(totalAmount).div(this.getCapitalPrice());
+        apy100 = totalProductionPerYear.mul(baseCent).mul(usdt).mul(baseDecimal).div(wht).div(totalAmount).div(this.getCapitalPrice());
     }
 }

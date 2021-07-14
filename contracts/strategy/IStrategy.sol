@@ -21,7 +21,7 @@ interface IStrategy {
 
     function withdrawAllToVault() external;
 
-    function getCapitalPrice() external view returns(uint256 price18);
+    function getCapitalPrice() external view returns (uint256 price18);
 
     function getPoolRewardApy() external view returns (uint256 apy100);
 }

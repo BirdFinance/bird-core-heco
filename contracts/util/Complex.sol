@@ -18,15 +18,21 @@ contract Complex {
 
     uint256 constant baseDecimal = 1e18;
     uint256 constant baseCent = 100;
-    address constant USDT_ADDRESS = 0xa71EdC38d189767582C38A3145b5873052c3e47a;
-    address constant MDX_ADDRESS = 0x25D2e80cB6B86881Fd7e07dd263Fb79f4AbE033c;
-    address constant MDX_USDT_PAIR = 0x615E6285c5944540fd8bd921c9c8c56739Fd1E13;
+
+//    address constant USDT_ADDRESS = 0xa71EdC38d189767582C38A3145b5873052c3e47a;
+//    address constant MDX_ADDRESS = 0x25D2e80cB6B86881Fd7e07dd263Fb79f4AbE033c;
+//    address constant MDX_USDT_PAIR = 0x615E6285c5944540fd8bd921c9c8c56739Fd1E13;
+
+    IMdexPair internal mdxUsdtPair;
+    address usdtForDex;
 
     address public bird;
     address public mdexFactory;
-    constructor(address _bird, address _mdexFactory) public {
+    constructor(address _bird, address _mdexFactory, IMdexPair _mdxUsdtPair, address _usdtForDex) public {
         bird = _bird;
         mdexFactory = _mdexFactory;
+        mdxUsdtPair = _mdxUsdtPair;
+        usdtForDex = _usdtForDex;
     }
 
 
@@ -85,11 +91,15 @@ contract Complex {
 
     function birdPrice() public view returns (uint256 price18){
         //calc bird price
-        address mdexPair = IMdexFactory(mdexFactory).getPair(bird, USDT_ADDRESS);
-        require(mdexPair != address(0), "bird<>usdt pair not found");
+        address mdexPair = IMdexFactory(mdexFactory).getPair(bird, usdtForDex);
+
+        if (mdexPair == address(0)) {
+            return 0;
+        }
+
         (uint256 reserve0,uint256 reserve1,) = IMdexPair(mdexPair).getReserves();
         //assume token0 is bird and token1 is usdt
-        if (IMdexPair(mdexPair).token0() == USDT_ADDRESS) {
+        if (IMdexPair(mdexPair).token0() == usdtForDex) {
             uint256 temp = reserve0;
             reserve0 = reserve1;
             reserve1 = temp;
@@ -99,8 +109,14 @@ contract Complex {
     }
 
     function mdxPrice() public view returns (uint256 price18){
-        //usdt, mdx
-        (uint256 mdx,uint256 usdt,) = IMdexPair(MDX_USDT_PAIR).getReserves();
+
+        //price = usdt / pud
+        (uint256 usdt,uint256 mdx,) = IMdexPair(mdxUsdtPair).getReserves();
+        if (IMdexPair(mdxUsdtPair).token1() == usdtForDex) {
+            uint256 temp = usdt;
+            usdt = mdx;
+            mdx = temp;
+        }
         return baseDecimal.mul(usdt).div(mdx);
     }
 }

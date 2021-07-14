@@ -33,12 +33,13 @@ abstract contract BaseStrategy is IStrategy, Ownable, Controllerable {
         address _swapRouter,
         IERC20 _rewardToken,
         uint256 _profitFee
-    )  Controllerable(_controller)public {
+    )  Controllerable(_controller) public {
         vault_ = _vault;
         capital_ = _capital;
         swapRouter = _swapRouter;
         rewardToken = _rewardToken;
-        profitFee = _profitFee;//30
+        profitFee = _profitFee;
+        //30
     }
 
 

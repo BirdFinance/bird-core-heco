@@ -9,11 +9,11 @@ import "../mdex/IMdexRouter.sol";
 import "../mdex/IMdexPair.sol";
 import "../vaults/IVault.sol";
 import "../strategy/IStrategy.sol";
-import "../rewardPool/IHecoPool.sol";
-import "./MdexHECOPoolBaseStrategy.sol";
+import "./ChannelsHECOPoolBaseStrategy.sol";
+import "../rewardPool/IChannelsPool.sol";
 
 
-contract MdexHECOPoolLPStrategy is MdexHECOPoolBaseStrategy {
+contract ChannelsHECOPoolLPStrategy is ChannelsHECOPoolBaseStrategy {
     using SafeMath for uint;
 
     address[] public mdexRoutesRewardToLp0;
@@ -28,23 +28,21 @@ contract MdexHECOPoolLPStrategy is MdexHECOPoolBaseStrategy {
         IERC20 _capital,
         address _swapRouter,
         IERC20 _rewardToken,
-        IHecoPool _pool,
-        uint256 _poolID,
+        IChannelsPool _pool,
         ISwapMining _swapMining,
         uint256 _profitFee,
-        IMdexPair _mdxUsdtPair,
+        IMdexPair _canUsdtPair,
         address _usdtForDex
-    ) MdexHECOPoolBaseStrategy(
+    ) ChannelsHECOPoolBaseStrategy(
         _vault,
         _controller,
         _capital,
         _swapRouter,
         _rewardToken,
         _pool,
-        _poolID,
         _swapMining,
         _profitFee,
-        _mdxUsdtPair,
+        _canUsdtPair,
         _usdtForDex
     ) public {
     }

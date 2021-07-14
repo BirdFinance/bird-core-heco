@@ -43,6 +43,8 @@ contract InvitationPool is LPTokenWrapper, Ownable
     uint256 public fee = 0.02 ether;
     bool internal feeCharged = false;
 
+    bool public getRewardAble = false;
+
     uint256 public withdrawCoolDown;
     //address => stake timestamp
     mapping(address => uint256) public withdrawCoolDownMap;
@@ -63,9 +65,10 @@ contract InvitationPool is LPTokenWrapper, Ownable
         address _taxCollector,
         IERC20 _checkToken,
         address _feeManager,
-        uint256 _withdrawCoolDown
+        uint256 _withdrawCoolDown,
+        bool _getRewardAble
     ) public {
-        require(_token != address(0), "_token is zero address");
+        //require(_token != address(0), "_token is zero address");
         require(_lptoken != address(0), "_lptoken is zero address");
         require(_minerOwner != address(0), "_minerOwner is zero address");
 
@@ -78,8 +81,13 @@ contract InvitationPool is LPTokenWrapper, Ownable
         checkToken = _checkToken;
         feeManager = _feeManager;
         withdrawCoolDown = _withdrawCoolDown;
+        getRewardAble = _getRewardAble;
     }
 
+    modifier rewardGetAble(){
+        require(getRewardAble, 'Pool: getRewardAble');
+        _;
+    }
 
     modifier checkStart() {
         require(block.timestamp >= starttime, 'Pool: not start');
@@ -107,7 +115,7 @@ contract InvitationPool is LPTokenWrapper, Ownable
                     _inviter = defaultInviter;
                 }
 
-                if(address(checkToken) != address (0)){
+                if (address(checkToken) != address(0)) {
                     if (balanceOf(_inviter) == 0 && checkToken.balanceOf(_inviter) == 0) {
                         _inviter = defaultInviter;
                     }
@@ -192,7 +200,7 @@ contract InvitationPool is LPTokenWrapper, Ownable
     updateReward(msg.sender)
     checkStart
     updateInviter(_inviter)
-    //chargeFee
+        //chargeFee
     updateCoolDown
     {
         require(amount > 0, 'Pool: Cannot stake 0');
@@ -228,7 +236,7 @@ contract InvitationPool is LPTokenWrapper, Ownable
 
     //3d18b912
     //hook the bonus when user getReward
-    function getReward() public payable updateReward(msg.sender) checkStart chargeFee {
+    function getReward() public payable updateReward(msg.sender) checkStart chargeFee rewardGetAble {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
@@ -255,7 +263,7 @@ contract InvitationPool is LPTokenWrapper, Ownable
     }
 
     //8bdff161
-    function getBonus() public payable checkStart chargeFee {
+    function getBonus() public payable checkStart chargeFee rewardGetAble {
         uint256 userBonus = bonus[msg.sender];
         if (userBonus > 0) {
             bonus[msg.sender] = 0;
@@ -349,11 +357,19 @@ contract InvitationPool is LPTokenWrapper, Ownable
         feeManager = _feeManager;
     }
 
-    function changeWithdrawCoolDown(uint256 _withdrawCoolDown) external onlyOwner{
+    function changeWithdrawCoolDown(uint256 _withdrawCoolDown) external onlyOwner {
         withdrawCoolDown = _withdrawCoolDown;
     }
 
-    function changeCheckToken(IERC20 _checkToken) external onlyOwner{
+    function changeCheckToken(IERC20 _checkToken) external onlyOwner {
         checkToken = _checkToken;
+    }
+
+    function changeGetRewardAble(bool _getRewardAblee) external onlyOwner {
+        getRewardAble = _getRewardAblee;
+    }
+
+    function changeTargetToken(IERC20 _token) external onlyOwner {
+        token = _token;
     }
 }

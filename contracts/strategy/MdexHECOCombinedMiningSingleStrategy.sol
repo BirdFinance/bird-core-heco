@@ -13,8 +13,13 @@ import "../strategy/IStrategy.sol";
 import "./BaseStrategy.sol";
 import "../rewardPool/IHecoPool.sol";
 import "./MdexHECOPoolBaseStrategy.sol";
+import "./MdexHECOCombinedMiningBaseStrategy.sol";
 
-contract MdexHECOPoolSingleStrategy is MdexHECOPoolBaseStrategy {
+/*
+AirdropMDX: ?? -> MDX
+MDX -> MDX poolID 0
+*/
+contract MdexHECOCombinedMiningSingleStrategy is MdexHECOCombinedMiningBaseStrategy {
     using Address for address;
     using SafeMath for uint;
 
@@ -28,13 +33,13 @@ contract MdexHECOPoolSingleStrategy is MdexHECOPoolBaseStrategy {
         IERC20 _capital,
         address _swapRouter,
         IERC20 _rewardToken,
-        IHecoPool _pool,
+        IHecoMdexCombinedMining _pool,
         uint256 _poolID,
         ISwapMining _swapMining,
         uint256 _profitFee,
-        IMdexPair _mdxUsdtPair,
+        IMdexPair _coindUsdtPair,
         address _usdtForDex
-    )MdexHECOPoolBaseStrategy(
+    )MdexHECOCombinedMiningBaseStrategy(
         _vault,
         _controller,
         _capital,
@@ -44,9 +49,8 @@ contract MdexHECOPoolSingleStrategy is MdexHECOPoolBaseStrategy {
         _poolID,
         _swapMining,
         _profitFee,
-        _mdxUsdtPair,
-        _usdtForDex
-    ) public {
+        _coindUsdtPair,
+        _usdtForDex) public {
     }
 
 

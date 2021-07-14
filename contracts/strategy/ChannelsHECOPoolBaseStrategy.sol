@@ -11,40 +11,33 @@ import "../strategy/IStrategy.sol";
 import "../mdex/IMdexRouter.sol";
 import "../mdex/IMdexPair.sol";
 import "./BaseStrategy.sol";
-import "../rewardPool/IHecoPool.sol";
 import "../mdex/ISwapMining.sol";
+import "../rewardPool/IChannelsPool.sol";
 
-abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
+abstract contract ChannelsHECOPoolBaseStrategy is BaseStrategy {
     using SafeERC20 for IERC20;
 
-    IHecoPool public pool;
-    uint256 public poolID;
+    IChannelsPool public pool;
     ISwapMining public swapMining;
-
-    IMdexPair internal mdxUsdtPair;
+    IMdexPair internal canUsdtPair;
     address usdtForDex;
 
     constructor(
         IVault _vault,
         IController _controller,
-        IERC20 _capital,
+        IERC20 _capital, //Can-HUSD_lp Can_HT_lp
         address _swapRouter,
         IERC20 _rewardToken,
-        IHecoPool _pool,
-        uint256 _poolID,
+        IChannelsPool _pool,
         ISwapMining _swapMining,
         uint256 _profitFee,
-        IMdexPair _mdxUsdtPair,
+        IMdexPair _canUsdtPair,
         address _usdtForDex
     )BaseStrategy(_vault, _controller, _capital, _swapRouter, _rewardToken, _profitFee) public {
         pool = _pool;
-        poolID = _poolID;
 
-        address _lpt;
-        (_lpt,,,,,) = pool.poolInfo(poolID);
-        require(_lpt == address(capital_), "Pool Info does not match capital");
         swapMining = _swapMining;
-        mdxUsdtPair = _mdxUsdtPair;
+        canUsdtPair = _canUsdtPair;
         usdtForDex = _usdtForDex;
     }
 
@@ -55,13 +48,13 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
         if (balance > 0) {
             capital_.safeApprove(address(pool), 0);
             capital_.safeApprove(address(pool), balance);
-            pool.deposit(poolID, balance);
+            pool.stake(balance);
         }
     }
 
     function emergencyWithdraw(uint256 _amount) public onlyOwner {
         if (_amount != 0) {
-            pool.emergencyWithdraw(_amount);
+            revert("stake-mining-pool not supported");
         }
     }
 
@@ -82,7 +75,7 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
         //if there are capital left in heco pool, get all back
         uint256 balance = balanceOfPool();
         if (balance != 0) {
-            pool.withdraw(poolID, balance);
+            pool.withdraw(balance);
         }
 
         //withdraw will also returns reward, so must do a compound exchange reward -> capital
@@ -94,11 +87,11 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
 
     // deposit 0 can claim all pending amount
     function getPoolReward() internal {
-        pool.deposit(poolID, 0);
+        pool.getReward();
     }
 
     function withdraw(uint256 _amount) internal {
-        pool.withdraw(poolID, _amount);
+        pool.withdraw(_amount);
     }
 
     function balanceOfStrategy() public view returns (uint256) {
@@ -106,7 +99,7 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
     }
 
     function balanceOfPool() public view returns (uint256 ret) {
-        (ret,) = pool.userInfo(poolID, address(this));
+        ret = pool.balanceOf(address(this));
         return ret;
     }
 
@@ -128,27 +121,24 @@ abstract contract MdexHECOPoolBaseStrategy is BaseStrategy {
 
     function getPoolRewardApy() override external view returns (uint256 apy100){
         //apy = totalProduction in usdt over one year / total stake in usdt
-        (,uint256 allocPoint,,,,uint256 totalAmount) = pool.poolInfo(poolID);
-        uint256 mdxPerBlock = pool.mdxPerBlock();
-        uint256 totalAllocPoint = pool.totalAllocPoint();
-        //underlying block time is 3 seconds
-        //rewardToken is mdx
-        uint256 totalProductionPerYear = mdxPerBlock.mul(10512000).mul(allocPoint).div(totalAllocPoint);
+        uint256 canPerSecond = pool.rewardRate();
 
-        //price = usdt / mdx
-        (uint256 usdt,uint256 mdx,) = IMdexPair(mdxUsdtPair).getReserves();
-        if (IMdexPair(mdxUsdtPair).token1() == usdtForDex) {
+        uint256 totalAmount = pool.totalSupply();
+        //rewardToken is can
+        uint256 totalProductionPerYear = canPerSecond.mul(365 * 86400);
+
+        //price = usdt / can
+        (uint256 usdt,uint256 can,) = IMdexPair(canUsdtPair).getReserves();
+        if (IMdexPair(canUsdtPair).token1() == usdtForDex) {
             uint256 temp = usdt;
-            usdt = mdx;
-            mdx = temp;
+            usdt = can;
+            can = temp;
         }
-
-
         /*
-                totalProductionPerYear * usdt / mdx
+                totalProductionPerYear * usdt / can
         apy =  -----------------------------------------------
                  totalAmount * capitalPrice / 10**18
         */
-        apy100 = totalProductionPerYear.mul(baseCent).mul(usdt).mul(baseDecimal).div(mdx).div(totalAmount).div(this.getCapitalPrice());
+        apy100 = totalProductionPerYear.mul(baseCent).mul(usdt).mul(baseDecimal).div(can).div(totalAmount).div(this.getCapitalPrice());
     }
 }

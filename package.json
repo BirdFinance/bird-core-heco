@@ -8,6 +8,9 @@
     "build:ts": "yarn run tsc",
     "build:sc": "npx hardhat compile --force",
 
+    "disapprove": "HARDHAT_NETWORK=huobi ts-node ./scripts/disapprove.ts",
+
+
     "infoVaultStrategy": "HARDHAT_NETWORK=huobi ts-node ./scripts/infoVaultStrategy.ts",
     "infoVault": "HARDHAT_NETWORK=huobi ts-node ./scripts/infoVault.ts",
     "compound": "HARDHAT_NETWORK=huobi ts-node ./scripts/compound.ts",
@@ -23,6 +26,24 @@
     "deployVaults": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployVaults.ts",
     "deployPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployPools.ts",
     "deployMiningPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployMiningPools.ts",
+    "deployMiningPoolsHGT": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployMiningPoolsHGT.ts",
+
+    "deployVaultsAndPoolOfBoardroom": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployVaultsAndPoolOfBoardroom.ts",
+    "deployVaultsAndPoolOfChannels": "HARDHAT_NETWORK=huobi ts-node ./scripts/deployVaultsAndPoolOfChannels.ts",
+
+    "updateMiningPools": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateMiningPools.ts",
+    "updateSmartPoolMiningPoolBatch": "HARDHAT_NETWORK=huobi ts-node ./scripts/updateSmartPoolMiningPoolBatch.ts",
+
+    "infoBird": "HARDHAT_NETWORK=huobi ts-node ./scripts/infoBird.ts",
+
+    "testChannelPool": "HARDHAT_NETWORK=huobi ts-node ./scripts/testChannelPool.ts",
+
+    "openMiningPoolsGetReward": "HARDHAT_NETWORK=huobi ts-node ./scripts/openMiningPoolsGetReward.ts",
+    "openPoolsGetReward": "HARDHAT_NETWORK=huobi ts-node ./scripts/openPoolsGetReward.ts",
+    "openBoardroomPoolsGetReward": "HARDHAT_NETWORK=huobi ts-node ./scripts/openBoardroomPoolsGetReward.ts",
+
+    "bridgeTransferBatch": "HARDHAT_NETWORK=huobi ts-node ./scripts/bridgeTransferBatch.ts",
+    "unlockDashixiongferBatch": "HARDHAT_NETWORK=huobi ts-node ./scripts/unlockDashixiongferBatch.ts",
 
     "======================": "==========================diff mnemonic==============================",
     "compare": "HARDHAT_NETWORK=hardhat ts-node scripts/compare.ts"
